@@ -1,0 +1,10 @@
+fastapi
+uvicorn
+openai
+requests
+pydantic
+aiofiles
+httpx
+python-dotenv
+rich
+tqdm
