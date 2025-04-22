@@ -59,7 +59,7 @@ def start_amara():
             output = generate_output()
         else:
             log("Autonómny režim vypnutý, čakám na manuálny zásah.", "PAUSE")
-        interval = config.get("interval", 60)
+        interval = adaptive_interval(config.get("interval", 60))
         time.sleep(interval)
 
 # Entry point
@@ -98,3 +98,88 @@ if __name__ == "__main__":
     manager.discover_units()
     manager.load_units()
     manager.run_units()
+    # === VÝKONOVÝ BOOST + AUTONÓMNE ROZHODNUTIA ===
+# Tento modul posúva Amaru na vyššiu úroveň: sleduje, kedy výstupy zarábajú, 
+# ktoré jednotky fungujú, a podľa toho rozhoduje o posilnení aktivity.
+
+def adaptive_performance_optimizer():
+    log_file = "storage/output.txt"
+    try:
+        with open(log_file, "r") as f:
+            lines = f.readlines()[-10:]  # Sleduj posledných 10 výstupov
+        topics = [json.loads(line).get("topic", "unknown") for line in lines]
+        top_topic = max(set(topics), key=topics.count)
+        log(f"[BOOST] Detegovaný záujem o tému: {top_topic}. Posilňujem generovanie.")
+        for _ in range(3):
+            generate_output()
+    except Exception as e:
+        log(f"[BOOST] Zlyhalo zlepšenie výkonu: {e}", "ERROR")
+
+# Aktivuj optimalizáciu každých pár cyklov (samostatné vlákno)
+def performance_loop(interval=600):
+    while True:
+        try:
+            adaptive_performance_optimizer()
+        except Exception as e:
+            log(f"[BOOST] Chyba v optimalizačnom vlákne: {e}", "ERROR")
+        time.sleep(interval)
+
+threading.Thread(target=performance_loop, daemon=True).start()
+# === ADAPTÍVNE PRISPÔSOBENIE INTERVALU PODĽA ÚSPEŠNOSTI ===
+
+def analyze_performance(window=10):
+    path = "storage/output.txt"
+    if not os.path.exists(path):
+        return 1.0
+    with open(path, "r") as f:
+        lines = f.readlines()[-window:]
+    return sum(1 for line in lines if '"success": true' in line) / max(len(lines), 1)
+
+def adaptive_interval(base=60):
+    rate = analyze_performance()
+    if rate >= 0.7:
+        return base
+    elif rate >= 0.4:
+        return base * 1.5
+    else:
+        return base * 3
+    from ai_units.self_optimizer import run as optimize_core
+
+def self_update_loop():
+    while True:
+        try:
+            optimize_core()
+        except Exception as e:
+            log(f"[CORE SELF-UPDATE] Zlyhanie: {e}", "ERROR")
+        time.sleep(900)  # každých 15 minút
+
+threading.Thread(target=self_update_loop, daemon=True).start()
+def smart_upgrade_generation():
+    path = "ai_units/amara_core.py"
+    backup_path = f"storage/backups/amara_core_smart_{datetime.now().strftime('%Y%m%d_%H%M%S')}.py"
+
+    try:
+        with open(path, "r") as f:
+            code = f.read()
+
+        # Ak je výstup obmedzený na "text", zmeň to na dynamický výber typu
+        if '"type": "text"' in code:
+            improved = code.replace(
+                '"type": "text"',
+                '"type": random.choice(["text", "video", "ebook", "thread"])'
+            )
+
+            # Ulož zálohu a prepíš
+            os.makedirs("storage/backups", exist_ok=True)
+            with open(backup_path, "w") as f:
+                f.write(code)
+            with open(path, "w") as f:
+                f.write(improved)
+
+            print("[SELF-OPTIMIZER] Amara rozšírila typy výstupov (text → video, ebook, thread).")
+
+    except Exception as e:
+        print(f"[SELF-OPTIMIZER] Zlyhanie pri smart upgradu: {e}")
+        # === AUTONÓMNE ZLEPŠOVANIE AMARY (SELF-OPTIMIZER) ===
+from ai_units.modules.self_optimizer import run as run_self_optimizer
+threading.Thread(target=run_self_optimizer).start()
