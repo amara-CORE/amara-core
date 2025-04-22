@@ -6,7 +6,12 @@ from datetime import datetime
 from uuid import uuid4
 
 # === AMARA CORE v3 – autonómny zarábajúci engine ===
-
+def adaptive_interval(value, default):
+    try:
+        interval = int(value)
+        return max(60, interval)
+    except:
+        return default
 # Log výstupov a spätnej väzby
 def log(message, level="INFO"):
     now = datetime.now().strftime("%Y-%m-%d %H:%M:%S")
